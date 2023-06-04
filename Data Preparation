@@ -1,0 +1,12 @@
+# map labels to index
+label_index = dict()
+index_label = dict()
+for i, x in enumerate(df_base['Class'].unique()):
+    label_index[x] = i
+    index_label[i] = x
+print(label_index)
+print(index_label)
+
+# update labels in df to index
+train_labels_idx = [label_index[l] for l in train_labels]
+train_labels_idx[::10]
