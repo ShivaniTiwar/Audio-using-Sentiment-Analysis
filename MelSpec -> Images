@@ -1,0 +1,54 @@
+def saveImg(f, fp):
+    f = np.flip(f, axis=0)
+    plt.figure()
+    plt.axis('off')
+    plt.imsave(fp, f, format='png')
+    plt.clf()
+    
+    def saveFeatureToImage(path, saveDir, avgFeat=0):
+    global sample_rate
+    files = sorted(os.listdir(path))
+    print("Scanning", path)
+
+    for i, fp in enumerate(files):
+        X, sr = loadAudio(os.path.join(path, fp))
+
+        f = librosa.feature.melspectrogram(y=X, sr=sample_rate)
+        f = librosa.amplitude_to_db(f, ref=np.max)
+
+        img = np.zeros((f.shape[0], avgFeat))
+        xWidth = min(f.shape[1],avgFeat)
+        img[:, :xWidth] = f[:,:xWidth]
+        fname = os.path.join(saveDir, fp.split('.')[0] + '.png')
+        saveImg(img, fname)
+        
+        f_dim = 128
+train_img_dir = './train_images'
+test_img_dir = './test_images'
+if not os.path.exists(train_img_dir):
+    os.mkdir(train_img_dir)
+    saveFeatureToImage(trainPath, train_img_dir, f_dim)
+if not os.path.exists(test_img_dir):
+    os.mkdir(test_img_dir)
+    saveFeatureToImage(testPath, test_img_dir, train_data.shape[1])
+    
+    def scanImgFeatures(path):
+    features = []
+    files = sorted(os.listdir(path))
+    for x in files:
+        fp = os.path.join(path, x)
+        img = imread(fp)[:,:,:3]/255.0
+        features.append(img)
+    return np.array(features), files
+    
+    if os.path.exists(train_img_dir):
+    train_data_img, train_files_img = scanImgFeatures(train_img_dir)
+if os.path.exists(test_img_dir):
+    test_data_img, test_files_img = scanImgFeatures(test_img_dir)
+    plt.imshow(test_data_img[0])
+    plt.show()
+    
+    def getPathLabels(p):
+    return [df_base[df_base['Filename'] == x].iloc[0,1] for x in p]
+    
+    train_labels = getPathLabels(train_files)
