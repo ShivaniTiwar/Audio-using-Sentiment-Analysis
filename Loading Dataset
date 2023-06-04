@@ -1,0 +1,12 @@
+trainPath = '/kaggle/input/audio-speech-sentiment/TRAIN/'
+testPath = '/kaggle/input/audio-speech-sentiment/TEST/'
+df_base = pd.read_csv('/kaggle/input/audio-speech-sentiment/TRAIN.csv')
+df_base.head()
+
+print("Dataset has",df_base.shape[0],"samples")
+print("Count of Positive and Negative samples")
+df_base['Class'].value_counts().reset_index()
+
+sample_rate = 44100
+def loadAudio(fp):
+    return librosa.load(fp, res_type='kaiser_fast', duration=2.5, offset=0.5, sr=sample_rate)
