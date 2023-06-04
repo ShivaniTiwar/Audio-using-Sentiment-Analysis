@@ -1,0 +1,34 @@
+def scanFeatures(path, avgFeat=0):
+    features = []
+    minFeat = sys.maxsize
+    maxFeat = 0
+    files = sorted(os.listdir(path))
+    print("Scanning", path)
+
+    for i, fp in enumerate(files):
+        X, sr = loadAudio(os.path.join(path, fp))
+
+        f = librosa.feature.melspectrogram(y=X, sr=sample_rate)
+        f = librosa.amplitude_to_db(f, ref=np.max)
+
+        shapeY = f.shape[1]
+        if shapeY < minFeat:
+            minFeat = shapeY
+
+        if shapeY > maxFeat:
+            maxFeat = shapeY
+
+        features.append(f)
+    if avgFeat == 0:
+        avgFeat = int((minFeat+maxFeat)/2)
+    feat_mat = np.zeros((len(files), f.shape[0], avgFeat))
+    for i, x in enumerate(features):
+        xWidth = min(x.shape[1],avgFeat)
+        feat_mat[i, :, :xWidth] = x[:,:xWidth]
+    return feat_mat, files
+    
+    f_dim = 128
+train_data, train_files = scanFeatures(trainPath, f_dim)
+test_data, test_files = scanFeatures(testPath, train_data.shape[1])
+print(train_data.shape)
+print(test_data.shape)
