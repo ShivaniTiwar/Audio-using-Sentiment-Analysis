@@ -1,0 +1,18 @@
+import sys, os
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+sns.set_style('whitegrid')
+%matplotlib inline
+import warnings
+warnings.filterwarnings('ignore')
+import sklearn.metrics as skm
+import sklearn.model_selection as skms
+import sklearn.preprocessing as skp
+import random, os
+import librosa, IPython
+import librosa.display as lplt
+from skimage.io import imread
+seed = 12
+np.random.seed(seed)
