@@ -1,0 +1,69 @@
+modelPath = './best_model.hdf5'
+ACCURACY_THRESHOLD = 0.95
+
+class myCallback(k.callbacks.Callback):
+    def on_epoch_end(self, epoch, logs={}):
+        if(logs.get('val_accuracy') > ACCURACY_THRESHOLD):
+            print("\n\nStopping training as we have reached %2.2f%% accuracy!" %(ACCURACY_THRESHOLD*100))   
+            self.model.stop_training = True
+
+acc_callback = myCallback()
+
+cbs = [#k.callbacks.ReduceLROnPlateau(patience=3, verbose=1), 
+       k.callbacks.ModelCheckpoint(filepath=modelPath, monitor='val_loss', verbose=1, save_best_only=True)]
+
+def trainImgModel(model, epochs, optimizer, vb=1):
+    batch_size = 64
+    callback = myCallback()
+    model.compile(optimizer=optimizer,
+                  loss='sparse_categorical_crossentropy',
+                  metrics='accuracy'
+    )
+    return model.fit(X_train_img, y_train, 
+                     validation_data=(X_test_img, y_test), epochs=epochs, verbose=vb,
+                     batch_size=batch_size, callbacks=cbs)
+
+def plotHistory(history):
+    print("Max. Validation Accuracy",max(history.history["val_accuracy"]))
+    pd.DataFrame(history.history).plot(figsize=(12,6))
+    plt.show()
+    
+    model_6 = k.models.Sequential([
+    k.layers.Conv2D(256, 3, activation='relu', input_shape=(128, 128, 3)),
+    k.layers.BatchNormalization(),
+    k.layers.MaxPooling2D(pool_size=(2)),
+    k.layers.Dropout(0.2),
+    k.layers.Conv2D(128, 3, activation='relu'),
+    k.layers.BatchNormalization(),
+    k.layers.MaxPooling2D(pool_size=(2)),
+    k.layers.Dropout(0.2),
+    k.layers.Conv2D(64, 3, padding='same', activation='relu'),
+    k.layers.BatchNormalization(),
+    k.layers.Flatten(),
+    k.layers.Dense(64, activation='relu'),
+    k.layers.Dense(len(index_label), activation='softmax'),
+
+])
+print(model_6.summary())
+model_6_history = trainImgModel(model=model_6, epochs=100, optimizer='rmsprop', vb=0)
+
+plotHistory(model_6_history)
+
+# model evaluation
+test_loss, test_acc  = k.models.load_model(bestModelPath).evaluate(X_test_img, y_test, batch_size=128)
+print("The test Loss is :",test_loss)
+print("The test Accuracy is :",test_acc*100)
+
+# test_data = np.expand_dims(test_data, axis=3)
+
+predictions = np.argmax(k.models.load_model(bestModelPath).predict(test_data_img), axis=1)
+predictions
+
+df_sub = pd.DataFrame({
+    'Filename': test_files,
+    'Class': list(map(lambda x:index_label[x], predictions))
+})
+df_sub.head()
+
+submission_file = 'submission.csv'
+df_sub.to_csv(submission_file, index=False)
