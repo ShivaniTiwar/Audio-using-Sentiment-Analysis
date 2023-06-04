@@ -1,0 +1,29 @@
+# shuffle samples
+df_shuffle = df_base.sample(frac=1, random_state=seed).reset_index(drop=True)
+
+# remove irrelevant columns
+df_shuffle.drop(['Filename'], axis=1, inplace=True)
+df_y = df_shuffle.pop('Class')
+
+# split into train dev and test
+y_train, y_test = skms.train_test_split(df_y, train_size=0.8, random_state=seed, stratify=df_y)
+
+print(f"Train set has {y_train.shape[0]} records out of {len(df_shuffle)} which is {round(y_train.shape[0]/len(df_shuffle)*100)}%")
+print(f"Test set has {y_test.shape[0]} records out of {len(df_shuffle)} which is {round(y_test.shape[0]/len(df_shuffle)*100)}%")
+
+# stratified split check
+print(y_train.value_counts())
+print(y_test.value_counts())
+# divide train_data into X_train and X_test
+X_train = train_data[y_train.index.tolist(), :, :]
+X_test = train_data[y_test.index.tolist(), :, :]
+X_test.shape
+
+# divide train_data_img into X_train_img and X_test_img
+X_train_img = train_data_img[y_train.index.tolist(), :, :]
+X_test_img = train_data_img[y_test.index.tolist(), :, :]
+X_test_img.shape
+
+y_train = np.array([train_labels_idx[x] for x in y_train.index.tolist()])
+y_test = np.array([train_labels_idx[x] for x in y_test.index.tolist()])
+y_train[::10]
